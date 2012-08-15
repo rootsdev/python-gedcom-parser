@@ -1,5 +1,5 @@
 #
-# Python Gedcom Parser
+# Python GEDCOM Parser
 #
 # This is a basic parser for the GEDCOM 5.5 format. For documentation of
 # this format, see

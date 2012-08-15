@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# This file is part of the Python Gedcom Parser
+# This file is part of the Python GEDCOM Parser
 
 # Copyright (C) 2012 Daniel Zappala (daniel.zappala [at] gmail.com)
 
