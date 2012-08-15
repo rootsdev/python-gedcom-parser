@@ -1,26 +1,25 @@
 #
-# Gedcom 5.5 Parser
+# Python Gedcom Parser
 #
-# Copyright (C) 2005 Daniel Zappala (zappala [ at ] cs.byu.edu)
-# Copyright (C) 2005 Brigham Young University
+# This is a basic parser for the GEDCOM 5.5 format. For documentation of
+# this format, see
 #
-# This program is free software; you can redistribute it and/or
-# modify it under the terms of the GNU General Public License
-# as published by the Free Software Foundation; either version 2
-# of the License, or (at your option) any later version.
-#
+# http://homepages.rootsweb.com/~pmcbride/gedcom/55gctoc.htm
+
+# Copyright (C) 2012 Daniel Zappala (daniel.zappala [at] gmail.com)
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-#
-# Please see the GPL license at http://www.gnu.org/licenses/gpl.txt
-#
-# To contact the author, see http://faculty.cs.byu.edu/~zappala
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 __all__ = ["Gedcom", "Element", "GedcomParseError"]
 
@@ -28,12 +27,7 @@ __all__ = ["Gedcom", "Element", "GedcomParseError"]
 import string
 
 class Gedcom:
-    """ Gedcom parser
-
-    This parser is for the Gedcom 5.5 format.  For documentation of
-    this format, see
-
-    http://homepages.rootsweb.com/~pmcbride/gedcom/55gctoc.htm
+    """Gedcom parser
 
     This parser reads a GEDCOM file and parses it into a set of
     elements.  These elements can be accessed via a list (the order of
@@ -44,8 +38,7 @@ class Gedcom:
     """
 
     def __init__(self,file):
-        """ Initialize a Gedcom parser. You must supply a Gedcom file.
-        """
+        """Initialize a Gedcom parser. You must supply a Gedcom file."""
         self.__element_list = []
         self.__element_dict = {}
         self.__element_top = Element(-1,"","TOP","",self.__element_dict)
@@ -55,15 +48,17 @@ class Gedcom:
         self.__parse(file)
 
     def element_list(self):
-        """ Return a list of all the elements in the Gedcom file.  The
+        """Return a list of all the elements in the Gedcom file.  The
         elements are in the same order as they appeared in the file.
+
         """
         return self.__element_list
 
     def element_dict(self):
-        """ Return a dictionary of elements from the Gedcom file.  Only
-        elements identified by a pointer are listed in the dictionary.  The
-        key for the dictionary is the pointer.
+        """Return a dictionary of elements from the Gedcom file.  Only
+        elements identified by a pointer are listed in the dictionary.
+        The key for the dictionary is the pointer.
+
         """
         return self.__element_dict
 
@@ -75,6 +70,9 @@ class Gedcom:
         f = open(file)
         number = 1
         for line in f.readlines():
+            # Skip over some junk that Rootsmagic puts in gedcom files.
+            if number == 1 and ord(line[0]) == 239:
+                line = line[3:]
             self.__parse_line(number,line)
             number += 1
         self.__count()
@@ -185,8 +183,7 @@ class Gedcom:
 
 
 class GedcomParseError(Exception):
-    """ Exception raised when a Gedcom parsing error occurs
-    """
+    """Exception raised when a Gedcom parsing error occurs."""
     
     def __init__(self, value):
         self.value = value
@@ -195,7 +192,7 @@ class GedcomParseError(Exception):
         return `self.value`
 
 class Element:
-    """ Gedcom element
+    """Gedcom element
 
     Each line in a Gedcom file is an element with the format
 
@@ -222,9 +219,10 @@ class Element:
     """
 
     def __init__(self,level,pointer,tag,value,dict):
-        """ Initialize an element.  You must include a level, pointer,
-        tag, value, and global element dictionary.  Normally initialized
-        by the Gedcom parser, not by a user.
+        """Initialize an element.  You must include a level, pointer,
+        tag, value, and global element dictionary.  Normally
+        initialized by the Gedcom parser, not by a user.
+
         """
         # basic element info
         self.__level = level
@@ -237,45 +235,45 @@ class Element:
         self.__parent = None
 
     def level(self):
-        """ Return the level of this element """
+        """Return the level of this element."""
         return self.__level
 
     def pointer(self):
-        """ Return the pointer of this element """
+        """Return the pointer of this element."""
         return self.__pointer
     
     def tag(self):
-        """ Return the tag of this element """
+        """Return the tag of this element."""
         return self.__tag
 
     def value(self):
-        """ Return the value of this element """
+        """Return the value of this element."""
         return self.__value
 
     def children(self):
-        """ Return the child elements of this element """
+        """Return the child elements of this element."""
         return self.__children
 
     def parent(self):
-        """ Return the parent element of this element """
+        """Return the parent element of this element."""
         return self.__parent
 
     def add_child(self,element):
-        """ Add a child element to this element """
+        """Add a child element to this element."""
         self.children().append(element)
         
     def add_parent(self,element):
-        """ Add a parent element to this element """
+        """Add a parent element to this element."""
         self.__parent = element
 
     def individual(self):
-        """ Check if this element is an individual """
+        """Check if this element is an individual."""
         return self.tag() == "INDI"
 
     # criteria matching
 
     def criteria_match(self,criteria):
-        """ Check in this element matches all of the given criteria.
+        """Check in this element matches all of the given criteria.
         The criteria is a colon-separated list, where each item in the
 
         list has the form [name]=[value]. The following criteria are supported:
@@ -295,7 +293,6 @@ class Element:
         marriagerange=[year1-year2]
 
         """
-
         # error checking on the criteria
         try:
             for crit in criteria.split(':'):
@@ -361,22 +358,23 @@ class Element:
         return match
 
     def surname_match(self,name):
-        """ Match a string with the surname of an individual """
+        """Match a string with the surname of an individual."""
         (first,last) = self.name()
         return last.find(name) >= 0
 
     def given_match(self,name):
-        """ Match a string with the given names of an individual """
+        """Match a string with the given names of an individual."""
         (first,last) = self.name()
         return first.find(name) >= 0
 
     def birth_year_match(self,year):
-        """ Match the birth year of an individual.  Year is an integer. """
+        """Match the birth year of an individual.  Year is an integer."""
         return self.birth_year() == year
 
     def birth_range_match(self,year1,year2):
-        """ Check if the birth year of an individual is in a given range.
-        Years are integers.
+        """Check if the birth year of an individual is in a given
+        range.  Years are integers.
+
         """
         year = self.birth_year()
         if year >= year1 and year <= year2:
@@ -384,12 +382,13 @@ class Element:
         return False
 
     def death_year_match(self,year):
-        """ Match the death year of an individual.  Year is an integer. """
+        """Match the death year of an individual.  Year is an integer."""
         return self.death_year() == year
 
     def death_range_match(self,year1,year2):
-        """ Check if the death year of an individual is in a given range.
+        """Check if the death year of an individual is in a given range.
         Years are integers.
+
         """
         year = self.death_year()
         if year >= year1 and year <= year2:
@@ -397,14 +396,17 @@ class Element:
         return False
 
     def marriage_year_match(self,year):
-        """ Check if one of the marriage years of an individual matches
-        the supplied year.  Year is an integer. """
+        """Check if one of the marriage years of an individual matches
+        the supplied year.  Year is an integer.
+
+        """
         years = self.marriage_years()
         return year in years
 
     def marriage_range_match(self,year1,year2):
-        """ Check if one of the marriage year of an individual is in a
+        """Check if one of the marriage year of an individual is in a
         given range.  Years are integers.
+
         """
         years = self.marriage_years()
         for year in years:
@@ -413,7 +415,7 @@ class Element:
         return False
 
     def families(self):
-        """ Return a list of all of the family elements of a person. """
+        """Return a list of all of the family elements of a person."""
         results = []
         for e in self.children():
             if e.tag() == "FAMS":
@@ -423,7 +425,7 @@ class Element:
         return results
 
     def name(self):
-        """ Return a person's names as a tuple: (first,last) """
+        """Return a person's names as a tuple: (first,last)."""
         first = ""
         last = ""
         if not self.individual():
@@ -445,7 +447,7 @@ class Element:
         return (first,last)
 
     def birth(self):
-        """ Return the birth tuple of a person as (date,place) """
+        """Return the birth tuple of a person as (date,place)."""
         date = ""
         place = ""
         if not self.individual():
@@ -460,7 +462,7 @@ class Element:
         return (date,place)
 
     def birth_year(self):
-        """ Return the birth year of a person in integer format """
+        """Return the birth year of a person in integer format."""
         date = ""
         if not self.individual():
             return date
@@ -478,7 +480,7 @@ class Element:
             return -1
 
     def death(self):
-        """ Return the death tuple of a person as (date,place) """
+        """Return the death tuple of a person as (date,place)."""
         date = ""
         place = ""
         if not self.individual():
@@ -493,7 +495,7 @@ class Element:
         return (date,place)
 
     def death_year(self):
-        """ Return the death year of a person in integer format """
+        """Return the death year of a person in integer format."""
         date = ""
         if not self.individual():
             return date
@@ -511,7 +513,7 @@ class Element:
             return -1
 
     def deceased(self):
-        """ Check if a person is deceased """
+        """Check if a person is deceased."""
         if not self.individual():
             return False
         for e in self.children():
@@ -520,8 +522,9 @@ class Element:
         return False
 
     def marriage(self):
-        """ Return a list of marriage tuples for a person, each listing
+        """Return a list of marriage tuples for a person, each listing
         (date,place).
+
         """
         date = ""
         place = ""
@@ -542,8 +545,9 @@ class Element:
         return (date,place)
 
     def marriage_years(self):
-        """ Return a list of marriage years for a person, each in integer
+        """Return a list of marriage years for a person, each in integer
         format.
+
         """
         dates = []
         if not self.individual():
@@ -566,23 +570,24 @@ class Element:
         return dates
 
     def get_individual(self):
-        """ Return this element and all of its sub-elements """
-        result = str(self)
+        """Return this element and all of its sub-elements."""
+        result = [self]
         for e in self.children():
-            result += '\n' + e.get_individual()
+            result.append(e)
         return result
 
     def get_family(self):
-        result = self.get_individual()
+        """Return this element any all elements in its families."""
+        result = [self]
         for e in self.children():
             if e.tag() == "HUSB" or e.tag() == "WIFE" or e.tag() == "CHIL":
                 f = self.__dict.get(e.value())
                 if f != None:
-                    result += '\n' + f.get_individual()
+                    result.append(f)
         return result
 
     def __str__(self):
-        """ Format this element as its original string """
+        """Format this element as its original string."""
         result = str(self.level())
         if self.pointer() != "":
             result += ' ' + self.pointer()

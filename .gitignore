@@ -1,0 +1,18 @@
+# backups
+*~
+# LaTeX
+*.dvi
+*.log
+*.aux
+*.nav
+*.snm
+*.toc
+*.out
+# Python
+*.pyc
+# C
+*.d
+*.o
+# Archives
+*.gz
+*.tgz
